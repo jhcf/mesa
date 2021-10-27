@@ -888,3 +888,27 @@ class NetworkGrid:
             if not self.is_cell_empty(node_id)
         ]
         return [item for sublist in list_of_lists for item in sublist]
+
+class DirectedNetworkGrid (NetworkGrid):
+    """ Network Grid where the graph as a directed graph, and where each node contains zero or more agents. """
+
+    def __init__(self, G: Any) -> None:
+        super().__init__(G)
+
+    def get_successors(self, node_id: int, include_center: bool = False) -> List[int]:
+        """ Get all nodes with outgoing adjacent vertexes to self """
+
+        neighbors = list(self.G.successors(node_id))
+        if include_center:
+            neighbors.append(node_id)
+
+        return neighbors
+
+    def get_predecessors(self, node_id: int, include_center: bool = False) -> List[int]:
+        """ Get all nodes with incoming adjacent vertexes to self """
+
+        neighbors = list(self.G.predecessors(node_id))
+        if include_center:
+            neighbors.append(node_id)
+
+        return neighbors

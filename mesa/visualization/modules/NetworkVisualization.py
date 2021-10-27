@@ -15,7 +15,7 @@ class NetworkModule(VisualizationElement):
     def __init__(
         self, portrayal_method, canvas_height=500, canvas_width=500, library="sigma"
     ):
-        library_types = ["sigma", "d3"]
+        library_types = ["sigma", "d3", "directed_d3"]
         if library not in library_types:
             raise ValueError(
                 "Invalid javascript library type. Expected one of: %s" % library_types
@@ -25,8 +25,9 @@ class NetworkModule(VisualizationElement):
             ["NetworkModule_sigma.js", "sigma.min.js"]
             if library == "sigma"
             else ["NetworkModule_d3.js", "d3.min.js"]
-        )
-
+            if library == "d3"
+            else ["DirectedNetworkModule_d3.js", "d3.min.js"] # "directed_d3"
+        )    
         self.portrayal_method = portrayal_method
         self.canvas_height = canvas_height
         self.canvas_width = canvas_width
