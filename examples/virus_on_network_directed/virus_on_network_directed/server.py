@@ -38,7 +38,7 @@ def network_portrayal(G):
                 agents[0].unique_id, agents[0].state.name
             ),
         }
-        for (_, agents) in G.nodes.data("agent")
+        for (_, agents) in sorted(G.nodes.data("agent"))
     ]
 
     portrayal["edges"] = [
@@ -56,7 +56,7 @@ def network_portrayal(G):
     return portrayal
 
 
-network = NetworkModule(network_portrayal, 500, 500, library="d3")
+network = NetworkModule(network_portrayal, 500, 500, library="directed_d3")
 chart = ChartModule(
     [
         {"Label": "Infected", "Color": "#FF0000"},
@@ -81,8 +81,8 @@ model_params = {
     "num_nodes": UserSettableParameter(
         "slider",
         "Number of agents",
-        10,
-        10,
+        2,
+        2,
         100,
         1,
         description="Choose how many agents to include in the model",

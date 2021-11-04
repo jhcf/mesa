@@ -5,7 +5,7 @@ import networkx as nx
 from mesa import Agent, Model
 from mesa.time import RandomActivation
 from mesa.datacollection import DataCollector
-from mesa.space import NetworkGrid
+from mesa.space import DirectedNetworkGrid
 
 
 class State(Enum):
@@ -46,8 +46,16 @@ class VirusOnNetworkDirected(Model):
 
         self.num_nodes = num_nodes
         prob = avg_node_degree / self.num_nodes
-        self.G = nx.erdos_renyi_graph(n=self.num_nodes, p=prob)
-        self.grid = NetworkGrid(self.G)
+        undirected_graph = nx.erdos_renyi_graph(n=self.num_nodes, p=prob)
+        ## convert an undirected graph to a directed one - using a random number
+        self.G = nx.DiGraph()
+        for u, v in undirected_graph.edges:
+            if (self.random.random() < 0.5):
+                self.G.add_edge(u,v)
+            else:
+                self.G.add_edge(v,u, width=1)
+
+        self.grid = DirectedNetworkGrid(self.G)
         self.schedule = RandomActivation(self)
         self.initial_outbreak_size = (
             initial_outbreak_size if initial_outbreak_size <= num_nodes else num_nodes
@@ -65,10 +73,9 @@ class VirusOnNetworkDirected(Model):
             }
         )
 
-        # Create agents
-        for i, node in enumerate(self.G.nodes()):
+        for node in sorted(self.G.nodes):
             a = VirusAgent(
-                i,
+                node,
                 self,
                 State.SUSCEPTIBLE,
                 self.virus_spread_chance,
@@ -127,7 +134,7 @@ class VirusAgent(Agent):
         self.gain_resistance_chance = gain_resistance_chance
 
     def try_to_infect_neighbors(self):
-        neighbors_nodes = self.model.grid.get_neighbors(self.pos, include_center=False)
+        neighbors_nodes = self.model.grid.get_successors(self.pos, include_center=False)
         susceptible_neighbors = [
             agent
             for agent in self.model.grid.get_cell_list_contents(neighbors_nodes)
